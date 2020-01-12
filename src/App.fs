@@ -1,10 +1,5 @@
 module App
 
-(**
- The famous Increment/Decrement ported from Elm.
- You can find more info about Elmish architecture and samples at https://elmish.github.io/
-*)
-
 open Elmish
 open Elmish.React
 open Fable.React
@@ -12,29 +7,36 @@ open Fable.React.Props
 
 // MODEL
 
-type Model = int
+type Card =
+    { text: string; id: int }
+
+let init_cards = [ { text = "first card"; id = 1 }
+                   { text = "second card"; id = 2 } ]
+
+type Model = Card list
 
 type Msg =
-| Increment
-| Decrement
+| Add
 
-let init() : Model = 0
+let init() : Model = init_cards
 
 // UPDATE
 
 let update (msg:Msg) (model:Model) =
     match msg with
-    | Increment -> model + 1
-    | Decrement -> model - 1
+    | Add -> model @ [{ text = "a new todo item!"; id = model.Length }]
+    //| Delete -> model - 1
 
 // VIEW (rendered with React)
 
 let view (model:Model) dispatch =
 
   div []
-      [ button [ OnClick (fun _ -> dispatch Increment) ] [ str "+" ]
-        div [] [ str (string model) ]
-        button [ OnClick (fun _ -> dispatch Decrement) ] [ str "-" ] ]
+      [ ol
+          []
+          (model
+           |> List.map (fun i -> li [] [ str i.text ]))
+        button [ OnClick (fun _ -> dispatch Add) ] [ str "+" ] ]
 
 // App
 Program.mkSimple init update view
