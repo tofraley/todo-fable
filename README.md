@@ -1,6 +1,6 @@
-# Fable Minimal App
+# todo-fable
 
-This is a simple Fable app including an [Elmish](https://elmish.github.io/) counter with as little configuration as possible. If you want to see a more complex app including commonly used F# tools like Paket or Fake, check [the Fulma demo](https://github.com/MangelMaxime/fulma-demo).
+This is a simple Fable app, using [Elmish](https://elmish.github.io/).
 
 ## Requirements
 
