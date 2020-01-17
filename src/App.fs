@@ -1,42 +1,86 @@
 module App
 
-open Elmish
-open Elmish.React
+open Fable.Core
 open Fable.React
 open Fable.React.Props
+open Browser.Types
+open Browser
+open Elmish
+open Elmish.React
+
+let [<Literal>] ENTER_KEY = 13.
 
 // MODEL
 
 type Card =
-    { text: string; id: int }
+    { text: string
+      id: int }
 
-let init_cards = [ { text = "first card"; id = 1 }
-                   { text = "second card"; id = 2 } ]
-
-type Model = Card list
+type Model = { entries: Card list
+               field: string }
 
 type Msg =
 | Add
+| Delete of int
+| UpdateField of string
+
+let init_cards = { entries = []
+                   field = "" }
 
 let init() : Model = init_cards
 
+let newEntry text id =
+    { text = text 
+      id = id }
 // UPDATE
 
 let update (msg:Msg) (model:Model) =
     match msg with
-    | Add -> model @ [{ text = "a new todo item!"; id = model.Length }]
-    //| Delete -> model - 1
+    | Add ->
+        let xs = if System.String.IsNullOrEmpty model.field then
+                    model.entries
+                 else
+                    model.entries @ [ newEntry model.field model.entries.Length ]
+        { model with
+            field = ""
+            entries = xs }
+
+    | UpdateField str -> { model with field = str }
+    | Delete id -> { model with entries = List.filter (fun t -> t.id <> id) model.entries }
 
 // VIEW (rendered with React)
 
-let view (model:Model) dispatch =
+let onEnter (msg:Msg) dispatch =
+    OnKeyDown (fun ev ->
+        if ev.keyCode = ENTER_KEY then
+            dispatch msg)
 
+let targetValue (ev: Event) =
+    (ev.target :?> HTMLInputElement).value
+
+let viewInput (model:string) dispatch =
+    input [
+        Class "new-todo"
+        Placeholder "What needs to be done?"
+        Value model
+        onEnter Add dispatch
+        OnChange (fun ev ->
+            targetValue ev |> UpdateField |> dispatch)
+        AutoFocus true
+    ]
+
+let view (model:Model) dispatch =
   div []
       [ ol
           []
-          (model
-           |> List.map (fun i -> li [] [ str i.text ]))
-        button [ OnClick (fun _ -> dispatch Add) ] [ str "+" ] ]
+          (model.entries
+           |> List.map (fun i -> li []
+                                    [ str i.text
+                                      button [ OnClick (fun _ -> Delete i.id |> dispatch) ]
+                                             [ str "-" ]
+                                    ]))
+        viewInput model.field dispatch
+      ]
 
 // App
 Program.mkSimple init update view
