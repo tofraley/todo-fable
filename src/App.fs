@@ -94,7 +94,7 @@ let listName isEditing (name:string) dispatch =
   if isEditing then
       nameInput name dispatch
   else
-      (clickable_h1 dispatch [ str name ])
+      clickable_h1 dispatch [ str name ]
 
 let view (model:Model) dispatch =
   div []
